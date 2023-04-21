@@ -7,11 +7,12 @@ merchants = {"merchant": 1}
 
 class MerchantController(BaseHTTPRequestHandler):
 
-    def do_GET(self):
+    def do_POST(self):
         """
-        Handles GET requests
+        Handles POST requests
         """
-        if self.path == '/merchant':
+        if self.path == '/merchant/signup':
+
             # Return the list of accounts
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
@@ -23,4 +24,3 @@ class MerchantController(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/plain')
             self.end_headers()
             self.wfile.write(b'Invalid endpoint')
-

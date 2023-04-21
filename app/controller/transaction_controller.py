@@ -7,9 +7,9 @@ transaction = {"transaction": 1}
 
 class TransactionController(BaseHTTPRequestHandler):
 
-    def do_GET(self):
+    def do_POST(self):
         """
-        Handles GET requests
+        Handles POST requests
         """
         if self.path == '/transaction':
             # Return the list of accounts
