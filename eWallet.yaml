@@ -2,10 +2,10 @@ swagger: '2.0'
 info:
   title: API Title
   version: '1.0'
-host: api.e-wallet.test
+host: localhost:8000
 basePath: /
 schemes:
-  - https
+  - http
 paths:
   /merchant/signup:
     post:

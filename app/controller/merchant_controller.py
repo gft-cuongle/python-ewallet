@@ -2,21 +2,21 @@ from http.server import BaseHTTPRequestHandler
 import json
 
 # A dictionary to store account details
-transaction = {"transaction": 1}
+merchants = {"merchant": 1}
 
 
-class TransactionController(BaseHTTPRequestHandler):
+class MerchantController(BaseHTTPRequestHandler):
 
     def do_GET(self):
         """
         Handles GET requests
         """
-        if self.path == '/transaction':
+        if self.path == '/merchant':
             # Return the list of accounts
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps(transaction).encode())
+            self.wfile.write(json.dumps(merchants).encode())
         else:
             # Invalid endpoint
             self.send_response(404)
