@@ -1,26 +1,42 @@
-from http.server import BaseHTTPRequestHandler
-
-from app.common.account_type import AccountType, get_account_type_by_value
-from app.service import account_service
 import json
+import re
+from http.server import BaseHTTPRequestHandler
+from urllib.parse import urlparse
+
+from app.common.account_type import get_account_type_by_value
+from app.service import account_service
+from app.service import token_service
 
 
 class AccountController(BaseHTTPRequestHandler):
 
     def do_GET(self):
         """
-        Handles GET requests
+        Handles GET requests for /account/{accountUUID}/token
         """
-        if self.path == '/account/123/token':
-            # Return the list of accounts
+        re_acc_token = r'^/account/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/token$'
+        parsed_url = urlparse(self.path)
+        if re.match(re_acc_token, parsed_url.path):
+            # Extract the accountUUID from the URL
+            account_uuid = parsed_url.path.split('/')[2]
+
+            account = account_service.get_account_by_id(account_uuid)
+            if account is None:
+                self.send_response(404)
+                self.send_header('Content-type', 'text/plain')
+                self.end_headers()
+                self.wfile.write(b'Account not found')
+                return
+
+            token = token_service.create_account_token(account)
+
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            acc = account_service.get_account_by_id("1ff41c84-5788-4f42-988a-b6c0e685e570")
-            self.wfile.write(json.dumps(acc).encode())
+            self.wfile.write(json.dumps(token).encode())
         else:
             # Invalid endpoint
-            self.send_response(404)
+            self.send_error(404)
             self.send_header('Content-type', 'text/plain')
             self.end_headers()
             self.wfile.write(b'Invalid endpoint')

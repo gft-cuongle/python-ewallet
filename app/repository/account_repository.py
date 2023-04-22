@@ -12,7 +12,7 @@ def create_account(account):
 
 def get_account_by_id(account_id):
     acc = db.search(Query().accountId == str(account_id))
-    if acc is not None:
+    if acc is not None and len(acc) > 0:
         return acc[0]
     else:
         return None
