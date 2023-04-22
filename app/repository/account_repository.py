@@ -16,3 +16,11 @@ def get_account_by_id(account_id):
         return acc[0]
     else:
         return None
+
+
+def update_account_balance(account_id, amount):
+    db.update({'balance': amount}, Query().accountId == str(account_id))
+
+
+def get_all_account():
+    return db.all()

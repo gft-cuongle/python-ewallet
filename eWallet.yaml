@@ -34,6 +34,12 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/Account'
+  /account/all:
+    get:
+      description: 'Get all account'
+      responses:
+        '200':
+          description: OK
   /account/{accountId}/token:
     get:
       description: Request a token for Authentication
@@ -49,9 +55,9 @@ paths:
             type: string
             example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiJhZWQwOTJjYy1hMjE1LTQ3ZDAtYTJkYS05MjgyMzFkMTc5NDgifQ.G5O2u0foXbrBOjhxRtCNxVnVL2MK-07sKSn_RcNNMlo
             description: include accountId and accountType
-  /account/{accountId}/topup:
+  /account/topup:
     post:
-      description: ''
+      description: Topup account
       parameters:
         - in: header
           name: Authentication
@@ -61,10 +67,6 @@ paths:
           name: payload
           schema:
             $ref: '#/definitions/TopupRequest'
-        - in: path
-          name: accountId
-          type: string
-          required: true
       responses:
         '200':
           description: OK
