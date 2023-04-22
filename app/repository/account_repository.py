@@ -1,5 +1,3 @@
-import json
-
 from tinydb import TinyDB, Query
 
 # Open the JSON file for reading and writing

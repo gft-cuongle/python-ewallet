@@ -1,4 +1,6 @@
 from http.server import BaseHTTPRequestHandler
+
+from app.common.account_type import AccountType, get_account_type_by_value
 from app.service import account_service
 import json
 
@@ -40,6 +42,14 @@ class AccountController(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(b'Account type is mandatory')
                 return
+
+            if get_account_type_by_value(account_type) is None:
+                self.send_response(400)
+                self.send_header('Content-type', 'text/plain')
+                self.end_headers()
+                self.wfile.write(b'Account type is not valid')
+                return
+
             account = account_service.create_account(account_type)
 
             self.send_response(201)
