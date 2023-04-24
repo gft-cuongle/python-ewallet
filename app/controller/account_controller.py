@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 from app.common.account_type import get_account_type_by_value, AccountType
 from app.service import account_service
 from app.service import token_service
+from app.utils.response_util import send_failure_response, send_success_response
 
 
 class AccountController(BaseHTTPRequestHandler):
@@ -22,33 +23,20 @@ class AccountController(BaseHTTPRequestHandler):
 
             account = account_service.get_account_by_id(account_uuid)
             if account is None:
-                self.send_response(404)
-                self.send_header('Content-type', 'text/plain')
-                self.end_headers()
-                self.wfile.write(b'Account not found')
+                send_failure_response(self, 404, b'Account not found')
                 return
 
             token = token_service.create_account_token(account)
-
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps(token).encode())
+            send_success_response(self, 200, json.dumps(token).encode())
             return
 
         if self.path == "/account/all":
             accounts = account_service.get_all_account()
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps(accounts).encode())
+            send_success_response(self, 200, json.dumps(accounts).encode())
             return
 
         # Invalid endpoint
-        self.send_error(404)
-        self.send_header('Content-type', 'text/plain')
-        self.end_headers()
-        self.wfile.write(b'Invalid endpoint')
+        send_failure_response(self, 404, b'Invalid endpoint')
 
     def do_POST(self):
         """
@@ -62,36 +50,26 @@ class AccountController(BaseHTTPRequestHandler):
             account_type = account_data.get('accountType')
             if account_type is None:
                 # Account type is mandatory
-                self.send_response(400)
-                self.send_header('Content-type', 'text/plain')
-                self.end_headers()
-                self.wfile.write(b'Account type is mandatory')
+                send_failure_response(self, 400, b'Account type is mandatory')
                 return
 
             if get_account_type_by_value(account_type) is None:
-                self.send_response(400)
-                self.send_header('Content-type', 'text/plain')
-                self.end_headers()
-                self.wfile.write(b'Account type is not valid')
+                send_failure_response(self, 400, b'Account type is not valid')
                 return
 
             account = account_service.create_account(account_type)
-
-            self.send_response(201)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps(account).encode())
+            send_success_response(self, 201, json.dumps(account).encode())
             return
 
         if self.path == "/account/topup":
             content_length = int(self.headers['Content-Length'])
             token = token_service.decode_token(self.headers['Authentication'])
+            if token is None:
+                send_failure_response(self, 400, b'Invalid token')
+                return
             # Validate account type
             if token["accountType"] != AccountType.ISSUER.value:
-                self.send_response(404)
-                self.send_header('Content-type', 'text/plain')
-                self.end_headers()
-                self.wfile.write(b'Only account type ISSUER is allowed to TOP UP')
+                send_failure_response(self, 400, b'Only account type ISSUER is allowed to TOP UP')
                 return
             post_data = self.rfile.read(content_length)
             account_data = json.loads(post_data.decode())
@@ -101,31 +79,18 @@ class AccountController(BaseHTTPRequestHandler):
             # Validate receiver account
             account = account_service.get_account_by_id(account_id)
             if account is None:
-                self.send_response(404)
-                self.send_header('Content-type', 'text/plain')
-                self.end_headers()
-                self.wfile.write(b'Account not found')
+                send_failure_response(self, 400, b'Account not found')
                 return
 
             # Validate issuer account
             issuer_account = account_service.get_account_by_id(token["accountId"])
             if issuer_account is None:
-                self.send_response(404)
-                self.send_header('Content-type', 'text/plain')
-                self.end_headers()
-                self.wfile.write(b'Issuer account not found')
+                send_failure_response(self, 400, b'Issuer account not found')
                 return
 
             account_service.topup_account(account_id, token["accountId"], amount)
-
-            self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps("top up success").encode())
+            send_success_response(self, 200, json.dumps("top up success").encode())
             return
 
         # Invalid endpoint
-        self.send_response(404)
-        self.send_header('Content-type', 'text/plain')
-        self.end_headers()
-        self.wfile.write(b'Invalid endpoint')
+        send_failure_response(self, 404, b'Invalid endpoint')

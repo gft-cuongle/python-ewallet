@@ -1,4 +1,4 @@
-from tinydb import TinyDB, Query
+from tinydb import TinyDB, where
 
 # Open the JSON file for reading and writing
 db = TinyDB('resources/merchant_database.json')
@@ -11,7 +11,7 @@ def create_merchant(merchant):
 
 
 def get_merchant_by_id(merchant_id):
-    merchant = db.search(Query().merchantId == str(merchant_id))
+    merchant = db.search(where("merchantId") == str(merchant_id))
     if merchant is not None:
         return merchant[0]
     else:

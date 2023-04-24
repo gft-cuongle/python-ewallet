@@ -1,4 +1,4 @@
-from tinydb import TinyDB, Query
+from tinydb import TinyDB, where
 
 # Open the JSON file for reading and writing
 db = TinyDB('resources/account_database.json')
@@ -11,7 +11,7 @@ def create_account(account):
 
 
 def get_account_by_id(account_id):
-    acc = db.search(Query().accountId == str(account_id))
+    acc = db.search(where("accountId") == str(account_id))
     if acc is not None and len(acc) > 0:
         return acc[0]
     else:
@@ -19,7 +19,7 @@ def get_account_by_id(account_id):
 
 
 def update_account_balance(account_id, amount):
-    db.update({'balance': amount}, Query().accountId == str(account_id))
+    db.update({'balance': amount}, where("accountId") == str(account_id))
 
 
 def get_all_account():

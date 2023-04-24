@@ -1,1 +1,1 @@
-{"_default": {"1": {"accountId": "108a4ca1-a19f-439c-af64-6e6675ad725f", "accountType": "issuer", "balance": -188888}, "2": {"accountId": "c2c4cdaa-4ab7-4da7-a418-6a0b0a090913", "accountType": "personal", "balance": 188888}}}
+{"_default": {"1": {"accountId": "108a4ca1-a19f-439c-af64-6e6675ad725f", "accountType": "issuer", "balance": -188888}, "2": {"accountId": "c2c4cdaa-4ab7-4da7-a418-6a0b0a090913", "accountType": "personal", "balance": 188888}, "3": {"accountId": "4b0c9c00-87d2-470e-8202-a30cbb0c75ad", "accountType": "merchant", "balance": 0}}}
