@@ -21,8 +21,8 @@ def init_transaction(merchant, amount, extra_data, signature):
     return transaction
 
 
-def get_all_initialized_transaction():
-    return transaction_repository.get_all_initialized_transaction()
+def get_all_not_completed_transaction():
+    return transaction_repository.get_all_not_completed_transaction()
 
 
 def update_transaction_status(transaction_id, status):

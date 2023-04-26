@@ -13,8 +13,10 @@ def init_transaction(transaction):
     return True
 
 
-def get_all_initialized_transaction():
-    return db.search(where("status") == TransactionStatus.INITIALIZED.value)
+def get_all_not_completed_transaction():
+    return db.search(
+        where("status") != TransactionStatus.COMPLETED.value
+        and where("status") != TransactionStatus.EXPIRED.value)
 
 
 def update_transaction_status(transaction_id, status):

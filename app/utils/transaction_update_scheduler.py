@@ -12,7 +12,7 @@ expired_time_in_minute = 5
 
 def update_expired_transaction():
     print("Cron job update expired transaction started at", int(time.time() * 1000))
-    trans = transaction_service.get_all_initialized_transaction()
+    trans = transaction_service.get_all_not_completed_transaction()
     if trans is None or len(trans) == 0:
         return
 
