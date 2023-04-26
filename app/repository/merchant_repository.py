@@ -12,7 +12,7 @@ def create_merchant(merchant):
 
 def get_merchant_by_id(merchant_id):
     merchant = db.search(where("merchantId") == str(merchant_id))
-    if merchant is not None:
+    if merchant is not None and len(merchant) > 0:
         return merchant[0]
     else:
         return None

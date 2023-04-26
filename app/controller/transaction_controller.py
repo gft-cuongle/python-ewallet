@@ -1,9 +1,10 @@
 from http.server import BaseHTTPRequestHandler
 import json
 
+from app.common.account_type import AccountType
+from app.service.transaction_service import init_transaction
+from app.service import token_service, merchant_service
 from app.utils.response_util import send_failure_response, send_success_response
-
-transaction = {"transaction": 1}
 
 
 class TransactionController(BaseHTTPRequestHandler):
@@ -13,34 +14,42 @@ class TransactionController(BaseHTTPRequestHandler):
         Handles POST requests
         """
         if self.path == '/transaction/create':
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps(transaction).encode())
+            content_length = int(self.headers['Content-Length'])
+            token = token_service.decode_token(self.headers['Authentication'])
+            if token is None:
+                send_failure_response(self, 400, b'Invalid token')
+                return
+            # Validate account type
+            if token["accountType"] != AccountType.MERCHANT.value:
+                send_failure_response(self, 400, b'Only account type MERCHANT is allowed to Init Transaction')
+                return
+            post_data = self.rfile.read(content_length)
+            account_data = json.loads(post_data.decode())
+            merchant_id = account_data.get('merchantId')
+            amount = account_data.get('amount')
+            extra_data = account_data.get('extraData')
+            signature = account_data.get('signature')
+
+            # Validate merchant
+            merchant = merchant_service.get_merchant_by_id(merchant_id)
+            if merchant is None:
+                send_failure_response(self, 404, b'Merchant not found')
+                return
+
+            transaction = init_transaction(merchant, amount, extra_data, signature)
+            send_success_response(self, 200, json.dumps(transaction).encode())
             return
 
         if self.path == '/transaction/confirm':
-            # Return the list of accounts
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps(transaction).encode())
+            send_success_response(self, 200, b'TODO')
             return
 
         if self.path == '/transaction/verify':
-            # Return the list of accounts
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps(transaction).encode())
+            send_success_response(self, 200, b'TODO')
             return
 
         if self.path == '/transaction/cancel':
-            # Return the list of accounts
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps(transaction).encode())
+            send_success_response(self, 200, b'TODO')
             return
 
         else:

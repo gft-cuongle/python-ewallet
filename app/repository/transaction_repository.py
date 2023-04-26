@@ -1,21 +1,22 @@
-from tinydb import TinyDB, Query
+import time
+
+from tinydb import TinyDB, Query, where
+
+from app.common.transaction_status import TransactionStatus
 
 # Open the JSON file for reading and writing
-db = TinyDB('../resources/transaction_database.json')
+db = TinyDB('resources/transaction_database.json')
 
-# Insert data into the database
-db.insert({'id': '112313-121321231', 'name': 'John', 'age': 25})
-# db.insert({'name': 'Jane', 'age': 30})
 
-# Query the database
-User = Query()
-result = db.search(User.name == 'John')
+def init_transaction(transaction):
+    db.insert(transaction)
+    return True
 
-# Print the result
-print(result)
 
-# Update data in the database
-# db.update({'age': 26}, User.name == 'John')
+def get_all_initialized_transaction():
+    return db.search(where("status") == TransactionStatus.INITIALIZED.value)
 
-# Remove data from the database
-# db.remove(User.name == 'Jane')
+
+def update_transaction_status(transaction_id, status):
+    db.update({'status': status}, where("transactionId") == str(transaction_id))
+    return db.update({'updatedTime': time.time() * 1000}, where("transactionId") == str(transaction_id))
