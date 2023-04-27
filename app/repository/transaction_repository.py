@@ -15,8 +15,9 @@ def init_transaction(transaction):
 
 def get_all_not_completed_transaction():
     return db.search(
-        where("status") != TransactionStatus.COMPLETED.value
-        and where("status") != TransactionStatus.EXPIRED.value)
+        where("status") == TransactionStatus.INITIALIZED.value
+        or where("status") == TransactionStatus.CONFIRMED.value
+        or where("status") == TransactionStatus.VERIFIED.value)
 
 
 def update_transaction_status(transaction_id, status):
