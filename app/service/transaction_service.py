@@ -27,3 +27,18 @@ def get_all_not_completed_transaction():
 
 def update_transaction_status(transaction_id, status):
     return transaction_repository.update_transaction_status(transaction_id, status)
+
+
+def get_transaction_by_id(transaction_id):
+    return transaction_repository.get_transaction_by_id(transaction_id)
+
+
+def confirm_transaction(account, tranx):
+    # Validate transaction before set status to confirm
+    if tranx["status"] != TransactionStatus.INITIALIZED.value:
+        return "Transaction status is not INITIALIZED"
+    if account["balance"] < tranx["amount"]:
+        update_transaction_status(tranx["transactionId"], TransactionStatus.FAILED.value)
+        return "Account balance is not enough"
+    transaction_repository.update_confirm_transaction(tranx["transactionId"], account["accountId"])
+    return "success"

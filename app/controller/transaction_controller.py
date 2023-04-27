@@ -3,7 +3,7 @@ import json
 
 from app.common.account_type import AccountType
 from app.service.transaction_service import init_transaction
-from app.service import token_service, merchant_service
+from app.service import token_service, merchant_service, account_service, transaction_service
 from app.utils.response_util import send_failure_response, send_success_response
 
 
@@ -41,7 +41,36 @@ class TransactionController(BaseHTTPRequestHandler):
             return
 
         if self.path == '/transaction/confirm':
-            send_success_response(self, 200, b'TODO')
+            content_length = int(self.headers['Content-Length'])
+            token = token_service.decode_token(self.headers['Authentication'])
+            if token is None:
+                send_failure_response(self, 400, b'Invalid token')
+                return
+            # Validate account type
+            if token["accountType"] != AccountType.PERSONAL.value:
+                send_failure_response(self, 400, b'Only account type PERSONAL is allowed to Confirm Transaction')
+                return
+            post_data = self.rfile.read(content_length)
+            account_data = json.loads(post_data.decode())
+            transaction_id = account_data.get('transactionId')
+
+            # Validate personal account
+            account = account_service.get_account_by_id(token["accountId"])
+            if account is None:
+                send_failure_response(self, 404, b'Account not found')
+                return
+
+            # Validate transaction
+            tranx = transaction_service.get_transaction_by_id(transaction_id)
+            if tranx is None:
+                send_failure_response(self, 404, b'Transaction not found')
+
+            message = transaction_service.confirm_transaction(account, tranx)
+            if message != "success":
+                send_failure_response(self, 400,
+                                      json.dumps({"code": "ERR", "message": message}).encode())
+                return
+            send_success_response(self, 200, json.dumps({"code": "SUC", "message": message}).encode())
             return
 
         if self.path == '/transaction/verify':

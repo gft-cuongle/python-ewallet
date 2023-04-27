@@ -15,11 +15,26 @@ def init_transaction(transaction):
 
 def get_all_not_completed_transaction():
     return db.search(
-        where("status") == TransactionStatus.INITIALIZED.value
-        or where("status") == TransactionStatus.CONFIRMED.value
-        or where("status") == TransactionStatus.VERIFIED.value)
+        (where("status") == TransactionStatus.INITIALIZED.value) |
+        (where("status") == TransactionStatus.CONFIRMED.value) |
+        (where("status") == TransactionStatus.VERIFIED.value)
+    )
 
 
 def update_transaction_status(transaction_id, status):
-    db.update({'status': status}, where("transactionId") == str(transaction_id))
-    return db.update({'updatedTime': time.time() * 1000}, where("transactionId") == str(transaction_id))
+    return db.update({'status': status, 'updatedTime': int(time.time() * 1000)},
+                     where("transactionId") == str(transaction_id))
+
+
+def update_confirm_transaction(transaction_id, personal_account_id):
+    db.update({'status': TransactionStatus.CONFIRMED.value, 'outcomeAccount': personal_account_id,
+               'updatedTime': int(time.time() * 1000)}, where("transactionId") == str(transaction_id))
+    return True
+
+
+def get_transaction_by_id(transaction_id):
+    transaction = db.search(where("transactionId") == str(transaction_id))
+    if transaction is not None and len(transaction) > 0:
+        return transaction[0]
+    else:
+        return None
