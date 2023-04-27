@@ -5,7 +5,7 @@ from app.common.transaction_status import TransactionStatus
 from app.utils.datetime_util import diff_time_in_minutes
 from app.service import transaction_service
 
-delay_time = 10
+scheduler_interval_time = 10
 scheduler = sched.scheduler(time.time, time.sleep)
 expired_time_in_minute = 5
 
@@ -24,7 +24,7 @@ def update_expired_transaction():
 
 def scheduled_task():
     update_expired_transaction()
-    scheduler.enter(delay_time, 1, scheduled_task)
+    scheduler.enter(scheduler_interval_time, 1, scheduled_task)
 
 
 scheduler.enter(0, 1, scheduled_task)

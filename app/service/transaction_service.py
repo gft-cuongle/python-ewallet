@@ -63,3 +63,15 @@ def verify_transaction(account, tranx):
     # Update trx to COMPLETED
     update_transaction_status(tranx["transactionId"], TransactionStatus.COMPLETED.value)
     return "success"
+
+
+def cancel_transaction(account, tranx):
+    # Validate transaction before set status to verified
+    if tranx["outcomeAccount"] != account["accountId"]:
+        return "Account ID is not the same to an account in step CONFIRMED"
+    if tranx["status"] != TransactionStatus.CONFIRMED.value:
+        return "Transaction status is not CONFIRMED"
+
+    # Update trx to CANCELED
+    update_transaction_status(tranx["transactionId"], TransactionStatus.CANCELED.value)
+    return "success"
