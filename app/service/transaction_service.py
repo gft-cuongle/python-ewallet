@@ -3,6 +3,7 @@ import uuid
 
 from app.common.transaction_status import TransactionStatus
 from app.repository import transaction_repository
+from app.service import account_service
 
 
 def init_transaction(merchant, amount, extra_data, signature):
@@ -41,4 +42,24 @@ def confirm_transaction(account, tranx):
         update_transaction_status(tranx["transactionId"], TransactionStatus.FAILED.value)
         return "Account balance is not enough"
     transaction_repository.update_confirm_transaction(tranx["transactionId"], account["accountId"])
+    return "success"
+
+
+def verify_transaction(account, tranx):
+    # Validate transaction before set status to verified
+    if tranx["outcomeAccount"] != account["accountId"]:
+        return "Account ID is not the same to an account in step CONFIRMED"
+    if tranx["status"] != TransactionStatus.CONFIRMED.value:
+        return "Transaction status is not CONFIRMED"
+    if account["balance"] < tranx["amount"]:
+        update_transaction_status(tranx["transactionId"], TransactionStatus.FAILED.value)
+        return "Account balance is not enough"
+    # Update trx to VERIFIED
+    transaction_repository.update_verify_transaction(tranx["transactionId"], account["accountId"])
+
+    # Do transfer
+    account_service.transfer_account_balance(tranx["incomeAccount"], tranx["outcomeAccount"], tranx["amount"])
+
+    # Update trx to COMPLETED
+    update_transaction_status(tranx["transactionId"], TransactionStatus.COMPLETED.value)
     return "success"

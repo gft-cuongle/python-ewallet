@@ -24,5 +24,15 @@ def topup_account(receiver_account_id, issuer_account_id, amount):
     account_repository.update_account_balance(issuer_account_id, issuer_balance - amount)
 
 
+def transfer_account_balance(income_account_id, outcome_account_id, amount):
+    income = account_repository.get_account_by_id(income_account_id)
+    income_balance = income["balance"]
+    account_repository.update_account_balance(income_account_id, income_balance + amount)
+
+    outcome = account_repository.get_account_by_id(outcome_account_id)
+    outcome_balance = outcome["balance"]
+    account_repository.update_account_balance(outcome_account_id, outcome_balance - amount)
+
+
 def get_all_account():
     return account_repository.get_all_account()

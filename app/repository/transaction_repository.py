@@ -32,6 +32,12 @@ def update_confirm_transaction(transaction_id, personal_account_id):
     return True
 
 
+def update_verify_transaction(transaction_id, personal_account_id):
+    db.update({'status': TransactionStatus.VERIFIED.value, 'outcomeAccount': personal_account_id,
+               'updatedTime': int(time.time() * 1000)}, where("transactionId") == str(transaction_id))
+    return True
+
+
 def get_transaction_by_id(transaction_id):
     transaction = db.search(where("transactionId") == str(transaction_id))
     if transaction is not None and len(transaction) > 0:
